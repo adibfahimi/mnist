@@ -1,8 +1,7 @@
 # MNIST
 train and test mnist dataset with pytorch (./pytorch.ipynb) and numpy (./numpy.ipynb)
 
-https://github.com/adibfahimi/mnist/raw/main/demo.mov
-## web demo
-![demo]([https://github.com/adibfahimi/mnist/raw/main/demo.gif)
 
+## web demo
+![demo](https://github.com/adibfahimi/mnist/raw/main/demo.gif)
 go to [demo](https://adibfahimi.github.io/mnist/)
