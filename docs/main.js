@@ -65,26 +65,27 @@ function resetCanvas() {
     document.getElementById('probability').innerHTML = 'start drawing';
 }
 
+const model = new onnx.InferenceSession();
+model.loadModel("./models/model.onnx").then(() => {
+    console.log("model loaded!");
+}).catch((err) => {
+    console.log(err);
+})
+
 function predict() {
-    const model = new onnx.InferenceSession();
-    model.loadModel("./models/model.onnx").then(() => {
-        const inputTensor = new onnx.Tensor(new Float32Array(
-            arrayData
-        ), 'float32', [1, 1, 28, 28]);
+    const inputTensor = new onnx.Tensor(new Float32Array(
+        arrayData
+    ), 'float32', [1, 1, 28, 28]);
 
-        model.run([inputTensor]).then((output) => {
-            const outputTensor = output.values().next().value;
-            const predictions = outputTensor.data;
-            const max = Math.max(...predictions);
-            const index = predictions.indexOf(max);
-            const digit = index.toString();
-            const probability = (max * 100).toFixed(2);
-            document.getElementById('digit').innerHTML = `Digit: ${digit}`;
-            document.getElementById('probability').innerHTML = `Probability: ${probability}%`;
-        }).catch((err) => {
-            console.log(err);
-        })
-
+    model.run([inputTensor]).then((output) => {
+        const outputTensor = output.values().next().value;
+        const predictions = outputTensor.data;
+        const max = Math.max(...predictions);
+        const index = predictions.indexOf(max);
+        const digit = index.toString();
+        const probability = (max * 100).toFixed(2);
+        document.getElementById('digit').innerHTML = `Digit: ${digit}`;
+        document.getElementById('probability').innerHTML = `Probability: ${probability}%`;
     }).catch((err) => {
         console.log(err);
     })
