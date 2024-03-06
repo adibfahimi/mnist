@@ -1,5 +1,5 @@
-const canvas = document.getElementById('arrayCanvas');
-const ctx = canvas.getContext('2d');
+const canvas = document.getElementById("arrayCanvas");
+const ctx = canvas.getContext("2d");
 const pixelSize = 10;
 let arrayData = new Array(28 * 28).fill(0);
 
@@ -14,10 +14,25 @@ function handleMouseUp() {
   isMouseDown = false;
 }
 
-
 function handleMouseMove(event) {
   if (isMouseDown) {
     updateCanvas(event);
+  }
+}
+
+function handleTouchStart(event) {
+  isMouseDown = true;
+  updateCanvas(event.touches[0]);
+}
+
+function handleTouchEnd() {
+  isMouseDown = false;
+}
+
+function handleTouchMove(event) {
+  if (isMouseDown) {
+    event.preventDefault();
+    updateCanvas(event.touches[0]);
   }
 }
 
@@ -33,9 +48,8 @@ function updateCanvas(event) {
   }
 }
 
-
 function drawPixel(x, y) {
-  ctx.fillStyle = 'white';
+  ctx.fillStyle = "white";
   ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
 }
 
@@ -50,45 +64,61 @@ function initializeCanvas() {
   }
 }
 
-canvas.addEventListener('mousedown', handleMouseDown);
-canvas.addEventListener('mouseup', handleMouseUp);
-canvas.addEventListener('mousemove', handleMouseMove);
+canvas.addEventListener("mousedown", handleMouseDown);
+canvas.addEventListener("mouseup", handleMouseUp);
+canvas.addEventListener("mousemove", handleMouseMove);
+
+canvas.addEventListener("touchstart", handleTouchStart);
+canvas.addEventListener("touchend", handleTouchEnd);
+canvas.addEventListener("touchmove", handleTouchMove);
 
 initializeCanvas();
 
 function resetCanvas() {
-  ctx.fillStyle = 'black';
+  ctx.fillStyle = "black";
   ctx.fillRect(0, 0, 280, 280);
   arrayData.fill(0);
 
-  document.getElementById('digit').innerHTML = '';
-  document.getElementById('probability').innerHTML = 'start drawing';
+  document.getElementById("digit").innerHTML = "";
+  document.getElementById("probability").innerHTML = "start drawing";
 }
 
 const model = new onnx.InferenceSession();
-model.loadModel("./models/model.onnx").then(() => {
-  console.log("model loaded!");
-}).catch((err) => {
-  console.log(err);
-})
+model
+  .loadModel("./models/model.onnx")
+  .then(() => {
+    console.log("model loaded!");
+  })
+  .catch((err) => {
+    console.log(err);
+  });
 
 function predict() {
-  const inputTensor = new onnx.Tensor(new Float32Array(
-    arrayData
-  ), 'float32', [1, 1, 28, 28]);
+  const inputTensor = new onnx.Tensor(
+    new Float32Array(arrayData),
+    "float32",
+    [1, 1, 28, 28]
+  );
 
-  model.run([inputTensor]).then((output) => {
-    const outputTensor = output.values().next().value;
-    const predictions = outputTensor.data;
-    const max = Math.max(...predictions);
-    const index = predictions.indexOf(max);
-    const digit = index.toString();
-    const probability = ((max / predictions.length) * 100).toFixed(2);
-    document.getElementById('digit').innerHTML = `Digit: ${digit}`;
-    document.getElementById('probability').innerHTML = `Probability: ${probability}%`;
-    document.getElementById('digit').innerHTML = `Digit: ${digit}`;
-    document.getElementById('probability').innerHTML = `Probability: ${probability}%`;
-  }).catch((err) => {
-    console.log(err);
-  })
+  model
+    .run([inputTensor])
+    .then((output) => {
+      const outputTensor = output.values().next().value;
+      const predictions = outputTensor.data;
+      const max = Math.max(...predictions);
+      const index = predictions.indexOf(max);
+      const digit = index.toString();
+      const probability = ((max / predictions.length) * 100).toFixed(2);
+      document.getElementById("digit").innerHTML = `Digit: ${digit}`;
+      document.getElementById(
+        "probability"
+      ).innerHTML = `Probability: ${probability}%`;
+      document.getElementById("digit").innerHTML = `Digit: ${digit}`;
+      document.getElementById(
+        "probability"
+      ).innerHTML = `Probability: ${probability}%`;
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 }
